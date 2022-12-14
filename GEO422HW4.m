@@ -69,11 +69,12 @@ C_y = (h-G*m1(:,1))*(h-G*m1(:,1))';
 %Create Model Covariance Matrix 
 C_m = G_g*C_y*G_g'./length(t);
 
-%New Model Using Covariance Weight
+%New Estimated Model Parameter Vector
 G_gnew = inv(G.'*inv(C_y)*G)*G.'*inv(C_y);
+%New Model Parameters
 mnew(:,1) = G_gnew*h;
 %New Estimate For Gravity
-a2 = mnew(3); 
+a2 = mnew(3); %finding this to also be around 9.2 m/s^2
 
 %Not sure why my a1 and a2 values are the same, but will move forward
 %anyway
@@ -82,10 +83,10 @@ a2 = mnew(3);
 dof = length(i)-3; %We have length(i) measurements and 3 parameters
 h_hat(:,1) = G*mnew(:,1);   %predicted data based on model
 data_error = h - h_hat(:,1); %residuals
-sig2 = var(data_error);
-x2 = zeros(length(i));
+sig2 = var(data_error); %variance of error
+x2 = zeros(length(i)); 
 for index = 1:length(i)
-    x2(index) = data_error(index).^2./sig2;
+    x2(index) = data_error(index).^2./sig2; %mean squared error
 end
 Chi2 = sum(x2); %Chi-Squared Value
 incr = 0:0.01:100;
@@ -95,8 +96,8 @@ hold on
 plot(incr, chi2pdf(incr, dof))
 title('Chi^2 Plot (dof = 19)')
 
-%Confidance Interval
-c = chi2cdf(Chi2(1), dof);
+%Confidence Interval
+c = chi2cdf(Chi2(1), dof); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -122,7 +123,7 @@ xlabel('Time (seconds)')
 legend('Raw Data Points', 'old model (m1)', 'new model (mnew)')
 ylim([0 0.85])
 
-%Plotting h and h_hat
+%Plotting h (measured data) and h_hat (predicted data) 
 figure(5)
 plot(t,h,'x','Color','k')
 hold on 
