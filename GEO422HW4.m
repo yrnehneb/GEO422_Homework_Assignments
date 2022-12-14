@@ -59,13 +59,10 @@ G_g = inv(G.'* G)*G.';
 % Find Model 1 Parameters
 m1(:,1) = G_g*h;
 % Estimate for gravity
-a1 = m1(3); %Finding Acceleration under this model to be around 12 m/s^2
-
+a1 = m1(3); %Finding Acceleration under this model to be around 9.2 m/s^2
 
 %Assign Unncertainties to the Measurements: Assuming the uncertainties
-%arise from the difference in the data (h) from the modeled data (G*m)
-%NOTE: For some reason, when I include the code below, both estimates for
-%gravity (a1 & a2) become identical and much closer to 9.8 m/s^2
+%arise from the difference in the data (h) from the modeled data (h_hat)
 
 %Create Covarianace Matrix: Cov = (d - E(d))*(d - E(d))' 
 C_y = (h-G*m1(:,1))*(h-G*m1(:,1))';
@@ -84,22 +81,61 @@ a2 = mnew(3);
 %Chi-Squared Test 
 dof = length(i)-3; %We have length(i) measurements and 3 parameters
 h_hat(:,1) = G*mnew(:,1);   %predicted data based on model
-data_error = h - h_hat(:,1);
+data_error = h - h_hat(:,1); %residuals
 sig2 = var(data_error);
 x2 = zeros(length(i));
 for index = 1:length(i)
     x2(index) = data_error(index).^2./sig2;
 end
-Chi2 = sum(x2); 
+Chi2 = sum(x2); %Chi-Squared Value
 incr = 0:0.01:100;
 %Plot the Chi2 results
-figure(1)
+figure(2)
 hold on
 plot(incr, chi2pdf(incr, dof))
 title('Chi^2 Plot (dof = 19)')
 
 %Confidance Interval
 c = chi2cdf(Chi2(1), dof);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%PLOTTING%
+
+%Raw Converted Data Points
+figure(3)
+plot(t,h,'.','LineWidth',2.0)
+title('Height vs. Time Plot')
+ylabel('Height (meters)')
+xlabel('Time (seconds)')
+ylim([0 0.85])
+
+%Plottting the Data Based on Model Parameters
+figure(4)
+plot(t,h,'x','Color','k')
+hold on
+plot(t,G*m1(:,1),'-.','Color','r','LineWidth',1.2)
+plot(t,h_hat,'Color','b')
+title('Height vs. Time')
+ylabel('Height (meters)')
+xlabel('Time (seconds)')
+legend('Raw Data Points', 'old model (m1)', 'new model (mnew)')
+ylim([0 0.85])
+
+%Plotting h and h_hat
+figure(5)
+plot(t,h,'x','Color','k')
+hold on 
+plot(t, h_hat,'x','Color','r')
+title('Height vs. Time')
+ylabel('Height (meters)')
+xlabel('Time (seconds)')
+legend('Measured (y)', 'Predicted (y-hat)')
+ylim([0 0.85])
+
+
+
+
 
 
 
